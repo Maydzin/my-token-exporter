@@ -59,7 +59,11 @@ before_script: []
   rules:
     - if: '$CI_COMMIT_TAG'
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables:
+        DEPLOY_IMAGE_TAG: "${CI_COMMIT_BRANCH}"
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
+      variables:
+        DEPLOY_IMAGE_TAG: "${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}"
 
 check-dockle:
   stage: scan
@@ -67,8 +71,14 @@ check-dockle:
     DEPLOY_IMAGE_TAG: "${CI_COMMIT_TAG}"
   rules:
     - if: '$CI_COMMIT_TAG'
+      variables:
+        DEPLOY_IMAGE_TAG: "${CI_COMMIT_TAG}"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables:
+        DEPLOY_IMAGE_TAG: "${CI_COMMIT_BRANCH}"
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
+      variables:
+        DEPLOY_IMAGE_TAG: "${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}"
 
 scan-trivy:
   stage: scan
@@ -76,8 +86,14 @@ scan-trivy:
     DEPLOY_IMAGE_TAG: "${CI_COMMIT_TAG}"
   rules:
     - if: '$CI_COMMIT_TAG'
+      variables:
+        DEPLOY_IMAGE_TAG: "${CI_COMMIT_TAG}"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables:
+        DEPLOY_IMAGE_TAG: "${CI_COMMIT_BRANCH}"
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
+      variables:
+        DEPLOY_IMAGE_TAG: "${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}"
 
 lint::infra-common:
   stage: lint
