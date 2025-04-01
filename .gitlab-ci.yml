@@ -7,10 +7,6 @@ include:
     ref: master
     file:
       - '/templates/helm.yml'
-  - project: 'adas/software/dataplatform/templates/dataplatform-helm'
-    ref: master
-    file:
-    - 'helm-dataplatform.yml'
 
 
 stages:
