@@ -29,6 +29,7 @@ variables:
   HELM_RELEASE_NAME: "gitlab-token-exporter"
   DEPLOY_IMAGE_TAG: "latest"
 
+before_script: []
 
 .build:release-image:
   variables:
