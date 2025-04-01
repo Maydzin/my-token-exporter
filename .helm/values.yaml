@@ -1,0 +1,52 @@
+replicaCount: 1
+
+image:
+  repository: cr.adas.e-kama.com/infra/gitlab-token-exporter
+  tag: latest
+  pullPolicy: IfNotPresent
+  pullSecrets:
+    - name: harbor-registry-credentials
+
+env:
+  - name: GITLAB_URL
+    value: "https://gitlab.int.e-kama.com"
+  - name: GROUP_ID
+    value: "160"
+
+secrets:
+  name: gitlab-exporter-secrets
+  data:
+    - name: ACCESS_TOKEN
+      key: accessToken
+
+nodeSelector:
+  node-role.adas.e-kama.com/infra: "true"
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+service:
+  type: ClusterIP
+  port: 8000
+  portName: http-metrics
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8000"
+    prometheus.io/path: "/metrics"
+    prometheus.io/scheme: "http"
+
+serviceMonitor:
+  enabled: true
+  interval: 120s
+  scrapeTimeout: 10s
+  scheme: http
+  additionalLabels:
+    team: devops
+    gitlab: gitlab-group-access-token-exporter
+    component: monitoring
+    release: prometheus
