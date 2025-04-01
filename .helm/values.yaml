@@ -49,4 +49,4 @@ serviceMonitor:
     team: devops
     gitlab: gitlab-group-access-token-exporter
     component: monitoring
-    release: prometheus
+    release: kube-prometheus-stack

@@ -4,7 +4,7 @@ metadata:
   name: {{ .Chart.Name }}-monitor
   labels:
     app: {{ .Chart.Name }}
-    release: prometheus
+    release: {{ .Values.serviceMonitor.additionalLabels.release | default "kube-prometheus-stack" }}
     {{- with .Values.serviceMonitor.additionalLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
