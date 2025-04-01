@@ -113,24 +113,24 @@ helm_deploy:
     HELM_SET: "image.tag=${CI_COMMIT_TAG}"
   before_script:
     - echo "${KUBE_CONFIG_BASE64}" | base64 -d > kubeconfig
+    - chmod 600 kubeconfig
     - export KUBECONFIG=$CI_PROJECT_DIR/kubeconfig
     - 'echo "Helm settings: $HELM_SET"'
   script:
     - |
       if [ "${HELM_IS_USE_LOCAL_REPO}" = "true" ]; then
-        helm upgrade --install $HELM_RELEASE_NAME $HELM_DIR \
+        helm upgrade --install $HELM_RELEASE_NAME $CI_PROJECT_DIR/$HELM_DIR \
           --namespace $KUBE_NAMESPACE \
           --create-namespace \
-          $HELM_SET
+          --set $HELM_SET
       else
         helm repo add $HELM_REPO_NAME $HELM_REPO_URL && \
         helm upgrade --install \
-          -f $HELM_VALUES_FILE \
-          $HELM_RELEASE_NAME $HELM_CHART \
+          $HELM_RELEASE_NAME $HELM_REPO_NAME/$HELM_CHART \
           --namespace $KUBE_NAMESPACE \
           --version $HELM_VERSION \
           --create-namespace \
-          $HELM_SET
+          --set $HELM_SET
       fi
   extends: [.default_helm_rules]
 
