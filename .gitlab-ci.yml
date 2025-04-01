@@ -114,16 +114,23 @@ helm_deploy:
   before_script:
     - echo "${KUBE_CONFIG_BASE64}" | base64 -d > kubeconfig
     - export KUBECONFIG=$CI_PROJECT_DIR/kubeconfig
-    - echo $HELM_SET
+    - 'echo "Helm settings: $HELM_SET"'
   script:
-    >-
+    - |
       if [ "${HELM_IS_USE_LOCAL_REPO}" = "true" ]; then
-        helm upgrade --install $HELM_RELEASE_NAME $HELM_DIR
-        --namespace $KUBE_NAMESPACE --create-namespace $HELM_SET
+        helm upgrade --install $HELM_RELEASE_NAME $HELM_DIR \
+          --namespace $KUBE_NAMESPACE \
+          --create-namespace \
+          $HELM_SET
       else
-        helm repo add $HELM_REPO_NAME $HELM_REPO_URL
-        && helm upgrade --install -f $HELM_VALUES_FILE $HELM_RELEASE_NAME $HELM_CHART
-        --namespace $KUBE_NAMESPACE --version $HELM_VERSION --create-namespace $HELM_SET
+        helm repo add $HELM_REPO_NAME $HELM_REPO_URL && \
+        helm upgrade --install \
+          -f $HELM_VALUES_FILE \
+          $HELM_RELEASE_NAME $HELM_CHART \
+          --namespace $KUBE_NAMESPACE \
+          --version $HELM_VERSION \
+          --create-namespace \
+          $HELM_SET
       fi
   extends: [.default_helm_rules]
 
