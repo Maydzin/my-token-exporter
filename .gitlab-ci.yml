@@ -57,19 +57,19 @@ before_script: []
   stage: build
   variables:
     DEPLOY_IMAGE_TAG: "${CI_COMMIT_TAG}"
-  extends: [default_build_check_rules]
+  extends: [.default_build_check_rules]
 
 check-dockle:
   stage: scan
   variables:
     DEPLOY_IMAGE_TAG: "${CI_COMMIT_TAG}"
-  extends: [default_build_check_rules]
+  extends: [.default_build_check_rules]
 
 scan-trivy:
   stage: scan
   variables:
     DEPLOY_IMAGE_TAG: "${CI_COMMIT_TAG}"
-  extends: [default_build_check_rules]
+  extends: [.default_build_check_rules]
 
 lint::infra-common:
   stage: lint
