@@ -37,17 +37,6 @@ variables:
 
 before_script: []
 
-.default_helm_rules:
-  rules:
-    - if: $CI_COMMIT_TAG
-      when: manual
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      when: manual
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
-      when: manual
-    - when: never
-
-
 .build:test-image:
   rules:
     - if: '$CI_COMMIT_TAG'
@@ -59,12 +48,6 @@ before_script: []
     DEPLOY_IMAGE_TAG: "${CI_COMMIT_TAG}"
   rules:
     - if: '$CI_COMMIT_TAG'
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      variables:
-        DEPLOY_IMAGE_TAG: "${CI_COMMIT_BRANCH}"
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
-      variables:
-        DEPLOY_IMAGE_TAG: "${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}"
 
 check-dockle:
   stage: scan
@@ -74,12 +57,6 @@ check-dockle:
     - if: '$CI_COMMIT_TAG'
       variables:
         DEPLOY_IMAGE_TAG: "${CI_COMMIT_TAG}"
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      variables:
-        DEPLOY_IMAGE_TAG: "${CI_COMMIT_BRANCH}"
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
-      variables:
-        DEPLOY_IMAGE_TAG: "${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}"
 
 scan-trivy:
   stage: scan
@@ -89,12 +66,6 @@ scan-trivy:
     - if: '$CI_COMMIT_TAG'
       variables:
         DEPLOY_IMAGE_TAG: "${CI_COMMIT_TAG}"
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      variables:
-        DEPLOY_IMAGE_TAG: "${CI_COMMIT_BRANCH}"
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
-      variables:
-        DEPLOY_IMAGE_TAG: "${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}"
 
 lint::infra-common:
   stage: lint
@@ -119,7 +90,9 @@ helm_deploy:
     - 'echo "Helm settings: $HELM_SET"'
   script:
     - helm upgrade --install -f $HELM_VALUES_FILE $HELM_RELEASE_NAME $HELM_DIR --namespace $KUBE_NAMESPACE --create-namespace --set $HELM_SET
-  extends: [.default_helm_rules]
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: manual
 
 helm_rollback:
   stage: rollback
@@ -129,4 +102,6 @@ helm_rollback:
   script:
     >-
       helm rollback $HELM_RELEASE_NAME -n $KUBE_NAMESPACE
-  extends: [.default_helm_rules]
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: manual
