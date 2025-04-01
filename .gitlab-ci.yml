@@ -49,13 +49,23 @@ lint::infra-common:
   stage: lint
 
 diff::infra-common:
+  before_script:
+    - echo "${KUBE_CONFIG_BASE64}" | base64 -d > kubeconfig
+    - export KUBECONFIG=$CI_PROJECT_DIR/kubeconfig
+    - helm plugin install https://github.com/databus23/helm-diff
   extends: .helm_diff
   stage: diff
 
 deploy::infra-common:
+  before_script:
+    - echo "${KUBE_CONFIG_BASE64}" | base64 -d > kubeconfig
+    - export KUBECONFIG=$CI_PROJECT_DIR/kubeconfig
   extends: .helm_deploy
   stage: deploy
 
 rollback::infra-common:
+  before_script:
+    - echo "${KUBE_CONFIG_BASE64}" | base64 -d > kubeconfig
+    - export KUBECONFIG=$CI_PROJECT_DIR/kubeconfig
   extends: .helm_rollback
   stage: rollback
