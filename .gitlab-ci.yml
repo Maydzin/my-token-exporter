@@ -46,41 +46,30 @@ before_script: []
       when: manual
     - when: never
 
-
+.default_build_check_rules:
+  rules:
+    - if: '$CI_COMMIT_TAG'
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
 
 
 .build:release-image:
   stage: build
   variables:
     DEPLOY_IMAGE_TAG: "${CI_COMMIT_TAG}"
-  rules:
-    - if: '$CI_COMMIT_TAG'
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
-
-.build:test-image:
-  stage: build
-  rules:
-    - if: '$CI_COMMIT_TAG'
-      when: never
+  extends: [default_build_check_rules]
 
 check-dockle:
   stage: scan
   variables:
     DEPLOY_IMAGE_TAG: "${CI_COMMIT_TAG}"
-  rules:
-    - if: '$CI_COMMIT_TAG'
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
+  extends: [default_build_check_rules]
 
 scan-trivy:
   stage: scan
   variables:
     DEPLOY_IMAGE_TAG: "${CI_COMMIT_TAG}"
-  rules:
-    - if: '$CI_COMMIT_TAG'
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
+  extends: [default_build_check_rules]
 
 lint::infra-common:
   stage: lint
