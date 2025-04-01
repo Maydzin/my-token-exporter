@@ -28,6 +28,7 @@ variables:
   KUBE_CONFIG_BASE64: "$KUBECONFIG_ADAS_INFRA_INT"
   KUBE_NAMESPACE: "gitlab-token-exporter"
   # Переменные для Helm
+  HELM_DIR: "${CI_PROJECT_DIR}/.helm"
   HELM_IS_USE_LOCAL_REPO: "true"
   HELM_VALUES_FILE: "${CI_PROJECT_DIR}/.helm/values.yaml"
   HELM_RELEASE_NAME: "gitlab-token-exporter"
@@ -117,21 +118,7 @@ helm_deploy:
     - export KUBECONFIG=$CI_PROJECT_DIR/kubeconfig
     - 'echo "Helm settings: $HELM_SET"'
   script:
-    - |
-      if [ "${HELM_IS_USE_LOCAL_REPO}" = "true" ]; then
-        helm upgrade --install $HELM_RELEASE_NAME $CI_PROJECT_DIR/$HELM_DIR \
-          --namespace $KUBE_NAMESPACE \
-          --create-namespace \
-          --set $HELM_SET
-      else
-        helm repo add $HELM_REPO_NAME $HELM_REPO_URL && \
-        helm upgrade --install \
-          $HELM_RELEASE_NAME $HELM_REPO_NAME/$HELM_CHART \
-          --namespace $KUBE_NAMESPACE \
-          --version $HELM_VERSION \
-          --create-namespace \
-          --set $HELM_SET
-      fi
+    - helm upgrade --install -f $HELM_VALUES_FILE $HELM_RELEASE_NAME $HELM_DIR --namespace $KUBE_NAMESPACE --create-namespace --set $HELM_SET
   extends: [.default_helm_rules]
 
 helm_rollback:
