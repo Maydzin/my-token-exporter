@@ -1,0 +1,60 @@
+---
+include:
+  - project: "adas/devops/images/common-ci"
+    ref: "master"
+    file: "/main.yml"
+  - project: 'adas/devops/gitlab-remote-includes'
+    ref: master
+    file:
+      - '/templates/helm.yml'
+
+stages:
+  - "lint"
+  - "build"
+  - "scan"
+  - "diff"
+  - "deploy"
+  - "rollback"
+
+variables:
+  DEPLOY_IMAGE_NAME: "gitlab-token-exporter"
+  DEPLOY_PROJECT_NAME: "infra"
+  DEPLOY_IMAGE_REGISTRY: "${DOCKER_REGISTRY}"
+  # Переменные для Kubeconfig
+  KUBE_CONFIG_BASE64: "$KUBECONFIG_ADAS_INFRA_INT"
+  KUBE_NAMESPACE: "gitlab-token-exporter"
+  # Переменные для Helm
+  HELM_IS_USE_LOCAL_REPO: "true"
+  HELM_VALUES_FILE: "${CI_PROJECT_DIR}/.helm/values.yaml"
+  HELM_RELEASE_NAME: "gitlab-token-exporter"
+  DEPLOY_IMAGE_TAG: "latest"
+
+
+.build:release-image:
+  variables:
+    DEPLOY_IMAGE_TAG: "${CI_COMMIT_TAG}"
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      when: on_success
+    - when: never
+
+.build:test-image:
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      when: never
+
+lint::infra-common:
+  extends: .helm_lint
+  stage: lint
+
+diff::infra-common:
+  extends: .helm_diff
+  stage: diff
+
+deploy::infra-common:
+  extends: .helm_deploy
+  stage: deploy
+
+rollback::infra-common:
+  extends: .helm_rollback
+  stage: rollback
