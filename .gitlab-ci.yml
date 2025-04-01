@@ -30,6 +30,7 @@ variables:
   HELM_IS_USE_LOCAL_REPO: "true"
   HELM_VALUES_FILE: "${CI_PROJECT_DIR}/.helm/values.yaml"
   HELM_RELEASE_NAME: "gitlab-token-exporter"
+  HELM_SET: ""
   DEPLOY_IMAGE_TAG: "latest"
 
 before_script: []
@@ -46,6 +47,24 @@ before_script: []
   rules:
     - if: '$CI_COMMIT_TAG'
       when: never
+
+check-dockle:
+  stage: scan
+  variables:
+    DEPLOY_IMAGE_TAG: "${CI_COMMIT_TAG}"
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      when: on_success
+    - when: never
+
+scan-trivy:
+  stage: scan
+  variables:
+    DEPLOY_IMAGE_TAG: "${CI_COMMIT_TAG}"
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      when: on_success
+    - when: never
 
 lint::infra-common:
   extends: .helm_lint
