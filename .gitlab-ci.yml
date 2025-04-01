@@ -84,8 +84,8 @@ deploy::infra-common:
     - export KUBECONFIG=$CI_PROJECT_DIR/kubeconfig
   extends: .helm_deploy
   stage: deploy
-  only:
-    - $CI_DEFAULT_BRANCH
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'push' && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 rollback::infra-common:
   before_script:
@@ -93,5 +93,5 @@ rollback::infra-common:
     - export KUBECONFIG=$CI_PROJECT_DIR/kubeconfig
   extends: .helm_rollback
   stage: rollback
-  only:
-    - $CI_DEFAULT_BRANCH
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'push' && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
