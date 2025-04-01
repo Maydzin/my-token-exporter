@@ -101,7 +101,6 @@ diff::infra-common:
       when: manual
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
       when: manual
-    - when: never
 
 .helm_rollback:
   stage: rollback
@@ -116,4 +115,3 @@ diff::infra-common:
       when: manual
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
       when: manual
-    - when: never
