@@ -36,6 +36,19 @@ variables:
 
 before_script: []
 
+.default_rules:
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: manual
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
+      when: manual
+    - when: never
+
+
+
+
 .build:release-image:
   stage: build
   variables:
@@ -55,19 +68,13 @@ check-dockle:
   stage: scan
   variables:
     DEPLOY_IMAGE_TAG: "${CI_COMMIT_TAG}"
-  rules:
-    - if: '$CI_COMMIT_TAG'
-      when: on_success
-    - when: never
+  extends: [.default_rules]
 
 scan-trivy:
   stage: scan
   variables:
     DEPLOY_IMAGE_TAG: "${CI_COMMIT_TAG}"
-  rules:
-    - if: '$CI_COMMIT_TAG'
-      when: on_success
-    - when: never
+  extends: [.default_rules]
 
 lint::infra-common:
   stage: lint
@@ -79,7 +86,7 @@ diff::infra-common:
     - echo "${KUBE_CONFIG_BASE64}" | base64 -d > kubeconfig
     - export KUBECONFIG=$CI_PROJECT_DIR/kubeconfig
     - helm plugin install https://github.com/databus23/helm-diff
-  extends: .helm_diff
+  extends: [.helm_diff, .default_rules]
 
 helm_deploy:
   stage: deploy
@@ -96,14 +103,7 @@ helm_deploy:
         && helm upgrade --install -f $HELM_VALUES_FILE $HELM_RELEASE_NAME $HELM_CHART
         --namespace $KUBE_NAMESPACE --version $HELM_VERSION --create-namespace $HELM_SET
       fi
-  rules:
-    - if: $CI_COMMIT_TAG
-      when: manual
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      when: manual
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
-      when: manual
-    - when: never
+  extends: [.default_rules]
 
 helm_rollback:
   stage: rollback
@@ -113,11 +113,4 @@ helm_rollback:
   script:
     >-
       helm rollback $HELM_RELEASE_NAME -n $KUBE_NAMESPACE
-  rules:
-    - if: $CI_COMMIT_TAG
-      when: manual
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      when: manual
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
-      when: manual
-    - when: never
+  extends: [.default_rules]
